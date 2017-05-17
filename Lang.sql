@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Май 12 2017 г., 07:46
+-- Время создания: Май 17 2017 г., 12:39
 -- Версия сервера: 10.1.21-MariaDB
 -- Версия PHP: 7.1.2
 
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- База данных: `mybusiness`
+-- База данных: `pizzabombs`
 --
 
 -- --------------------------------------------------------
@@ -32,6 +32,18 @@ CREATE TABLE `lang` (
   `text` text NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+--
+-- Дамп данных таблицы `lang`
+--
+
+INSERT INTO `lang` (`id`, `lang`, `text`) VALUES
+('message01', 1, 'Не удалось сменить язык'),
+('message01', 2, 'Coudn\'t change language'),
+('button01', 1, 'Добавить'),
+('button01', 2, 'Add'),
+('button02', 1, 'Сохранить'),
+('button02', 2, 'Save');
+
 -- --------------------------------------------------------
 
 --
@@ -42,7 +54,15 @@ CREATE TABLE `langs` (
   `id` int(11) NOT NULL,
   `code` varchar(3) NOT NULL,
   `name` varchar(6) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+--
+-- Дамп данных таблицы `langs`
+--
+
+INSERT INTO `langs` (`id`, `code`, `name`) VALUES
+(1, 'ru', 'RU'),
+(2, 'en', 'EN');
 
 --
 -- Индексы сохранённых таблиц
