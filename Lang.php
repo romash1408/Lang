@@ -1,6 +1,13 @@
 <?php
 class Lang{
-	private static $curLang = null, $defLang = null;
+	const
+		CURRENT_AT_TOP = 1;
+	
+	private static
+		$curLang = null,
+		$defLang = null,
+		$RIGHT_ALIGNED = array("ar");
+	
 	public $id, $name, $code,
 		$texts = null;
 	
@@ -49,9 +56,11 @@ class Lang{
 		);
 	}
 	
-	public static function getAll(){
+	public static function getAll($flags = 0){
+		if($flags & static::CURRENT_AT_TOP) $order = "`id` = ".(static::getCurrentLanguage()->id)." DESC,";
+		
 		$ret = [];
-		$langs = App::db()->query("SELECT * FROM `langs` ORDER BY `id` ASC");
+		$langs = App::db()->query("SELECT * FROM `langs` ORDER BY $order `id` ASC ");
 		while($next = $langs->fetch_assoc())
 			$ret[] = new static($next);
 		return $ret;
@@ -101,7 +110,7 @@ class Lang{
 		return (static::$curLang = $lang);
 	}
 	
-	public static function getCurLang()
+	public static function getSelectedLang()
 	{
 		if(static::$curLang !== null) return static::$curLang;
 		if(!isset($_SESSION["lang"])) $_SESSION["lang"] = [];
@@ -118,7 +127,7 @@ class Lang{
 		$found = [];
 		
 		//Если пользователь уже выбрал язык, то он первый в приоритете
-		if($cur = static::getCurLang())
+		if($cur = static::getSelectedLang())
 		{
 			$found[$cur->code] = 1;
 			$langs[] = $cur;
@@ -132,34 +141,71 @@ class Lang{
 			if($add = static::find($match[1])) $langs[] = $add;
 		}, strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"] . ","));
 		
-		//И последним идёт язык по умолчанию для сайта
-		$def = static::getDefaultLanguage();
-		if(!isset($found[$def->code])) $langs[] = $def;
+		// В конце все остальные языки сайта, включая язык по-умолчанию, если его ещё не было
+		foreach(static::getAll() as $lang)
+		{
+			if(!isset($found[$lang->code]))
+			{
+				$found[$lang->code] = 1;
+				$langs[] = $lang;
+			}
+		}
 		
 		return $langs;
 	}
 	
-	public static function write($text, $ln = "html")
+	public static function getCurrentLanguage()
+	{
+		return static::getPreferedLangs()[0];
+	}
+	
+	public static function write($text, $ln = "html", &$outLang = null)
 	{
 		foreach(static::getPreferedLangs() as $lang)
 		{
 			if(($ret = $lang->text($text)) !== null)
 			{
+				$outLang = $lang;
+				
 				if(gettype($ln) == 'object' && get_class($ln) == 'Closure') return $ln($ret);
 				switch($ln)
 				{
 				case "html":
 					return str_replace("\n", "<br />", $ret);
 					break;
+				case "attr":
+					return str_replace("\n", '\n', $ret);
+					break;
 				case "array":
 					return explode("\n", $ret);
 					break;
+				default:
+					return str_replace("\n", $ln, $ret);
 				}
 				return $ret;
 			}
 		}
 		App::log("Lang: '$text' wasn't found in any language!");
 		return "";
+	}
+	
+	public static function file($name, &$outLang = null)
+	{
+		foreach(static::getPreferedLangs() as $lang)
+		{
+			if(is_file("./" . ($ret = str_replace("%lang", $lang->code, $name))))
+			{
+				$outLang = $lang;
+				return $ret;
+			}
+		}
+		App::log("Lang: file '$name' wasn't found in any language!");
+		return $name;
+	}
+	
+	public static function isRightAligned(Lang $lang)
+	{
+		return in_array($lang->code, static::$RIGHT_ALIGNED);
 	}
 }
 ?>
