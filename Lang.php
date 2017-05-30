@@ -171,7 +171,7 @@ class Lang{
 				switch($ln)
 				{
 				case "html":
-					return str_replace("\n", "<br />", $ret);
+					return static::html($ret);
 					break;
 				case "attr":
 					return str_replace("\n", '\n', $ret);
@@ -193,7 +193,7 @@ class Lang{
 	{
 		foreach(static::getPreferedLangs() as $lang)
 		{
-			if(is_file("./" . ($ret = str_replace("%lang", $lang->code, $name))))
+			if(is_file($ret = str_replace("%lang", $lang->code, $name)))
 			{
 				$outLang = $lang;
 				return $ret;
@@ -206,6 +206,24 @@ class Lang{
 	public static function isRightAligned(Lang $lang)
 	{
 		return in_array($lang->code, static::$RIGHT_ALIGNED);
+	}
+	
+	public static function html($text)
+	{
+		// теги
+		$text = preg_replace_callback('/\[(\/?)([A-z _\-]*)\]/', function($m){
+			switch($m[2])
+			{
+			default:
+				if($m[1] == '/') return "</span>";
+				return "<span class='$m[2]'>";
+			}
+		}, $text);
+		
+		// Перенос строки
+		$text = str_replace("\n", '<br />', $text);
+		
+		return $text;
 	}
 }
 ?>
