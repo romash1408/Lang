@@ -126,14 +126,14 @@ class Lang{
 		$langs = [];
 		$found = [];
 		
-		//Если пользователь уже выбрал язык, то он первый в приоритете
+		// Р•СЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ РІС‹Р±СЂР°Р» СЏР·С‹Рє, С‚Рѕ РѕРЅ РїРµСЂРІС‹Р№ РІ РїСЂРёРѕСЂРёС‚РµС‚Рµ
 		if($cur = static::getSelectedLang())
 		{
 			$found[$cur->code] = 1;
 			$langs[] = $cur;
 		}
 		
-		//Далее идут языки из настроек его браузера
+		// Р”Р°Р»РµРµ РёРґСѓС‚ СЏР·С‹РєРё РёР· РЅР°СЃС‚СЂРѕРµРє РµРіРѕ Р±СЂР°СѓР·РµСЂР°
 		preg_replace_callback("/([a-z]{2,3})(-?[a-z0-9-;.=]*)?,/", function($match) use(&$langs, &$found)
 		{
 			if(isset($found[$match[1]])) return;
@@ -141,7 +141,7 @@ class Lang{
 			if($add = static::find($match[1])) $langs[] = $add;
 		}, strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"] . ","));
 		
-		// В конце все остальные языки сайта, включая язык по-умолчанию, если его ещё не было
+		// Р’ РєРѕРЅС†Рµ РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ СЏР·С‹РєРё СЃР°Р№С‚Р°, РІРєР»СЋС‡Р°СЏ СЏР·С‹Рє РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ, РµСЃР»Рё РµРіРѕ РµС‰С‘ РЅРµ Р±С‹Р»Рѕ
 		foreach(static::getAll() as $lang)
 		{
 			if(!isset($found[$lang->code]))
@@ -216,7 +216,7 @@ class Lang{
 	
 	public static function html($text)
 	{
-		// теги
+		// С‚РµРіРё
 		$text = preg_replace_callback('/\[(\/?)([A-z _\-]*)\]/', function($m){
 			switch($m[2])
 			{
@@ -226,7 +226,7 @@ class Lang{
 			}
 		}, $text);
 		
-		// Перенос строки
+		// РџРµСЂРµРЅРѕСЃ СЃС‚СЂРѕРєРё
 		$text = str_replace("\n", '<br />', $text);
 		
 		return $text;
