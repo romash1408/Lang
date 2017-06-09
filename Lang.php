@@ -208,7 +208,7 @@ class Lang{
 		return in_array($lang->code, static::$RIGHT_ALIGNED);
 	}
 
-	public static function dir($lang)
+	public static function dir(Lang $lang = null)
 	{
 		if(!($lang instanceof Lang)) $lang = Lang::getCurrentLanguage();
 		return (static::isRightAligned($lang) ? "rtl" : "ltr");
